@@ -12,16 +12,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.Principal;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+
+import static java.util.Collections.enumeration;
 
 public class TestRequest implements HttpServletRequest {
     private static final Logger log = LogManager.getLogger (TestRequest.class);
 
     private String queryString;
     private Bag postData;
+    private Map<String, String> headers;
 
     public TestRequest (String queryString) {
         this (queryString, null);
@@ -30,6 +30,11 @@ public class TestRequest implements HttpServletRequest {
     public TestRequest (String queryString, Bag postData) {
         this.queryString = queryString;
         this.postData = postData;
+        headers = new HashMap<> ();
+    }
+
+    public void addHeader (String headerName, String headerValue) {
+        headers.put (headerName, headerValue);
     }
 
     @Override
@@ -49,7 +54,7 @@ public class TestRequest implements HttpServletRequest {
 
     @Override
     public String getHeader (String s) {
-        return null;
+        return headers.get (s);
     }
 
     @Override
@@ -59,7 +64,7 @@ public class TestRequest implements HttpServletRequest {
 
     @Override
     public Enumeration<String> getHeaderNames () {
-        return null;
+        return enumeration (headers.keySet ());
     }
 
     @Override
