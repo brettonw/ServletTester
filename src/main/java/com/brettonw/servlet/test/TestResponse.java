@@ -11,11 +11,12 @@ import java.util.Locale;
 
 public class TestResponse implements HttpServletResponse {
     private File writerFile;
+    String contentType;
+    String characterEncoding;
 
     public TestResponse (File writerFile) {
         this.writerFile = writerFile;
     }
-
 
     @Override
     public PrintWriter getWriter () throws IOException {
@@ -130,12 +131,12 @@ public class TestResponse implements HttpServletResponse {
 
     @Override
     public String getCharacterEncoding () {
-        return null;
+        return characterEncoding;
     }
 
     @Override
     public String getContentType () {
-        return null;
+        return contentType;
     }
 
     @Override
@@ -145,7 +146,7 @@ public class TestResponse implements HttpServletResponse {
 
     @Override
     public void setCharacterEncoding (String s) {
-
+        characterEncoding = s;
     }
 
     @Override
@@ -160,7 +161,7 @@ public class TestResponse implements HttpServletResponse {
 
     @Override
     public void setContentType (String s) {
-
+        contentType = s;
     }
 
     @Override

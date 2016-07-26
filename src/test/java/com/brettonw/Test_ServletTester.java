@@ -21,9 +21,12 @@ public class Test_ServletTester extends HttpServlet {
     private static final Logger log = LogManager.getLogger (Test_ServletTester.class);
 
     public static final String OK_KEY = "ok";
+    public static final String ERROR_KEY = "error";
     public static final String STATUS_KEY = "status";
     public static final String POST_DATA_KEY = "post-data";
     public static final String IP_KEY = "ip";
+    public static final String COMMAND_KEY = "command";
+    public static final String TEST_KEY = "test";
 
     ServletTester servletTester;
 
@@ -34,22 +37,30 @@ public class Test_ServletTester extends HttpServlet {
     @Override
     protected void doGet (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.debug ("doGet");
-        makeResponse (response, new BagObject ()
-                .put (STATUS_KEY, request.getQueryString ())
-                .put (IP_KEY, request.getRemoteAddr ())
-                .toString ());
+
+        BagObject query = BagObjectFrom.string (request.getQueryString (), MimeType.URL);
+        BagObject responseObject = new BagObject (query).put (IP_KEY, request.getRemoteAddr ());
+        if (query.getString (COMMAND_KEY).equals (TEST_KEY)) {
+            makeResponse (response, responseObject.put (STATUS_KEY, OK_KEY).toString ());
+        } else {
+            makeResponse (response, responseObject.put (STATUS_KEY, ERROR_KEY).toString ());
+        }
     }
 
     @Override
     protected void doPost (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.debug ("doPost");
-        SourceAdapter sourceAdapter = new SourceAdapterReader (request.getInputStream (), MimeType.JSON);
-        String requestString = sourceAdapter.getStringData ();
-        BagObject postData = BagObjectFrom.string (requestString);
-        makeResponse (response, new BagObject ()
-                .put (STATUS_KEY, request.getQueryString ())
-                .put (POST_DATA_KEY, postData)
-                .toString ());
+
+        BagObject query = BagObjectFrom.string (request.getQueryString (), MimeType.URL);
+        BagObject responseObject = new BagObject (query).put (IP_KEY, request.getRemoteAddr ());
+        if (query.getString (COMMAND_KEY).equals (TEST_KEY)) {
+            SourceAdapter sourceAdapter = new SourceAdapterReader (request.getInputStream (), MimeType.JSON);
+            String postDataString = sourceAdapter.getStringData ();
+            BagObject postData = BagObjectFrom.string (postDataString);
+            makeResponse (response, responseObject.put (STATUS_KEY, OK_KEY).put (POST_DATA_KEY, postData).toString ());
+        } else {
+            makeResponse (response, responseObject.put (STATUS_KEY, ERROR_KEY).toString ());
+        }
     }
 
     public void makeResponse (HttpServletResponse response, String responseText) throws IOException {
@@ -65,17 +76,36 @@ public class Test_ServletTester extends HttpServlet {
         out.close ();
     }
 
-    @Test
-    public void testGet () throws IOException {
-        BagObject bagObject = servletTester.bagObjectFromGet ("OK");
-        assertTrue (OK_KEY.equalsIgnoreCase (bagObject.getString (STATUS_KEY)));
+    private void doGetAssert (BagObject bagObject) {
+        assertTrue (bagObject.getString (STATUS_KEY).equals (OK_KEY));
         assertTrue (bagObject.getString (IP_KEY) != null);
         log.info (IP_KEY + ": " + bagObject.getString (IP_KEY));
     }
+
     @Test
-    public void testPost () throws IOException {
+    public void testGetByObject () throws IOException {
+        doGetAssert (servletTester.bagObjectFromGet (new BagObject ().put (COMMAND_KEY, TEST_KEY)));
+    }
+
+    @Test
+    public void testGetByString () throws IOException {
+        doGetAssert (servletTester.bagObjectFromGet (new BagObject ().put (COMMAND_KEY, TEST_KEY).toString (MimeType.URL)));
+    }
+
+    private void doPostAssert (BagObject bagObject, BagObject postData) {
+        doGetAssert (bagObject);
+        assertTrue (bagObject.getBagObject (POST_DATA_KEY).equals (postData));
+    }
+
+    @Test
+    public void testPostByObject () throws IOException {
         BagObject postData = BagObjectFrom.resource (getClass (), "/testPost.json");
-        BagObject bagObject = servletTester.bagObjectFromPost ("OK", postData);
-        assertTrue (OK_KEY.equalsIgnoreCase (bagObject.getString (STATUS_KEY)));
+        doPostAssert (servletTester.bagObjectFromPost (new BagObject ().put (COMMAND_KEY, TEST_KEY), postData), postData);
+    }
+
+    @Test
+    public void testPostByString () throws IOException {
+        BagObject postData = BagObjectFrom.resource (getClass (), "/testPost.json");
+        doPostAssert (servletTester.bagObjectFromPost (new BagObject ().put (COMMAND_KEY, TEST_KEY).toString (MimeType.URL), postData), postData);
     }
 }

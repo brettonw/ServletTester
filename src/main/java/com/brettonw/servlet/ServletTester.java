@@ -3,6 +3,7 @@ package com.brettonw.servlet;
 import com.brettonw.bag.Bag;
 import com.brettonw.bag.BagObject;
 import com.brettonw.bag.BagObjectFrom;
+import com.brettonw.bag.formats.MimeType;
 import com.brettonw.servlet.test.TestRequest;
 import com.brettonw.servlet.test.TestResponse;
 import com.brettonw.servlet.test.TestServletConfig;
@@ -67,12 +68,20 @@ public class ServletTester extends HttpServlet {
         }
     }
 
+    public File fileFromGet (BagObject query) throws IOException {
+        return fileFromGet (query.toString (MimeType.URL));
+    }
+
     public File fileFromGet (String queryString) throws IOException {
         File outputFile = new File (targetTestDir, java.util.UUID.randomUUID().toString ());
         TestResponse response = new TestResponse (outputFile);
         TestRequest request = new TestRequest (queryString);
         callFetchMethod ("doGet", request, response);
         return outputFile;
+    }
+
+    public File fileFromPost (BagObject query, Bag postData) throws IOException {
+        return fileFromPost (query.toString (MimeType.URL), postData);
     }
 
     public File fileFromPost (String queryString, Bag postData) throws IOException {
@@ -83,11 +92,25 @@ public class ServletTester extends HttpServlet {
         return outputFile;
     }
 
+    private BagObject bagObjectFromFile (File outputFile) {
+        BagObject bagObject = BagObjectFrom.file (outputFile);
+        outputFile.delete ();
+        return bagObject;
+    }
+
+    public BagObject bagObjectFromGet (BagObject query) throws IOException {
+        return bagObjectFromFile (fileFromGet (query));
+    }
+
     public BagObject bagObjectFromGet (String queryString) throws IOException {
-        return BagObjectFrom.file (fileFromGet (queryString));
+        return bagObjectFromFile (fileFromGet (queryString));
+    }
+
+    public BagObject bagObjectFromPost (BagObject query, Bag postData) throws IOException {
+        return bagObjectFromFile (fileFromPost (query, postData));
     }
 
     public BagObject bagObjectFromPost (String queryString, Bag postData) throws IOException {
-        return BagObjectFrom.file (fileFromPost (queryString, postData));
+        return bagObjectFromFile (fileFromPost (queryString, postData));
     }
 }
