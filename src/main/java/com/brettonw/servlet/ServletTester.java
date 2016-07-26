@@ -48,7 +48,7 @@ public class ServletTester extends HttpServlet {
         } catch (NoSuchMethodException exception) {}
         try {
             //httpServlet.doGet (request, response);
-            method = httpServlet.getClass ().getDeclaredMethod (name, HttpServletRequest.class, HttpServletResponse.class);
+            declaredMethod = httpServlet.getClass ().getDeclaredMethod (name, HttpServletRequest.class, HttpServletResponse.class);
         } catch (NoSuchMethodException exception) {}
         return (method != null) ? method : declaredMethod;
     }
