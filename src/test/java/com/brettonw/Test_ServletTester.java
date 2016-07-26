@@ -23,6 +23,7 @@ public class Test_ServletTester extends HttpServlet {
     public static final String OK_KEY = "ok";
     public static final String STATUS_KEY = "status";
     public static final String POST_DATA_KEY = "post-data";
+    public static final String IP_KEY = "ip";
 
     ServletTester servletTester;
 
@@ -34,7 +35,9 @@ public class Test_ServletTester extends HttpServlet {
     protected void doGet (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.debug ("doGet");
         makeResponse (response, new BagObject ()
-                .put (STATUS_KEY, request.getQueryString ()).toString ());
+                .put (STATUS_KEY, request.getQueryString ())
+                .put (IP_KEY, request.getRemoteAddr ())
+                .toString ());
     }
 
     @Override
@@ -66,6 +69,8 @@ public class Test_ServletTester extends HttpServlet {
     public void testGet () throws IOException {
         BagObject bagObject = servletTester.bagObjectFromGet ("OK");
         assertTrue (OK_KEY.equalsIgnoreCase (bagObject.getString (STATUS_KEY)));
+        assertTrue (bagObject.getString (IP_KEY) != null);
+        log.info (IP_KEY + ": " + bagObject.getString (IP_KEY));
     }
     @Test
     public void testPost () throws IOException {

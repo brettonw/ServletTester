@@ -33,8 +33,8 @@ public class ServletTester extends HttpServlet {
             httpServlet.init (new TestServletConfig (getClass ().getName ()));
             targetTestDir = new File (TARGET_DIR, TEST_DIR);
             targetTestDir.mkdirs ();
-        } catch (ServletException e) {
-            e.printStackTrace ();
+        } catch (ServletException exception) {
+            log.error (exception);
         }
     }
 

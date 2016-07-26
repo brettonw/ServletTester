@@ -1,12 +1,16 @@
 package com.brettonw.servlet.test;
 
 import com.brettonw.bag.Bag;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -14,6 +18,8 @@ import java.util.Locale;
 import java.util.Map;
 
 public class TestRequest implements HttpServletRequest {
+    private static final Logger log = LogManager.getLogger (TestRequest.class);
+
     private String queryString;
     private Bag postData;
 
@@ -273,7 +279,12 @@ public class TestRequest implements HttpServletRequest {
 
     @Override
     public String getRemoteAddr () {
-        return null;
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException exception) {
+            log.error (exception);
+        }
+        return "127.0.0.1";
     }
 
     @Override
