@@ -1,6 +1,7 @@
 package com.brettonw.servlet.test;
 
 import com.brettonw.bag.Bag;
+import com.brettonw.bag.formats.MimeType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -8,9 +9,11 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.*;
 
@@ -19,8 +22,12 @@ import static java.util.Collections.enumeration;
 public class TestRequest implements HttpServletRequest {
     private static final Logger log = LogManager.getLogger (TestRequest.class);
 
+    public static final String UTF_8 = StandardCharsets.UTF_8.name ();
+    public static final String CONTENT_TYPE_KEY = "Content-Type";
+    public static final String CONTENT_LENGTH_KEY = "Content-Length";
+
     private String queryString;
-    private Bag postData;
+    private String postData;
     private Map<String, String> headers;
 
     public TestRequest (String queryString) {
@@ -28,9 +35,23 @@ public class TestRequest implements HttpServletRequest {
     }
 
     public TestRequest (String queryString, Bag postData) {
+        this (queryString, postData, MimeType.DEFAULT);
+    }
+
+    public TestRequest (String queryString, Bag postDataBag, String mimeType) {
         this.queryString = queryString;
-        this.postData = postData;
         headers = new HashMap<> ();
+        postData = null;
+        if (postDataBag != null) {
+            postData = postDataBag.toString (mimeType);
+            addHeader (CONTENT_TYPE_KEY, mimeType + ";charset=" + UTF_8);
+            try {
+                byte[] bytes = postData.getBytes (UTF_8);
+                addHeader (CONTENT_LENGTH_KEY, Integer.toString (bytes.length));
+            } catch (UnsupportedEncodingException exception) {
+                log.error (exception);
+            }
+        }
     }
 
     public void addHeader (String headerName, String headerValue) {
@@ -39,7 +60,7 @@ public class TestRequest implements HttpServletRequest {
 
     @Override
     public String getAuthType () {
-        return null;
+        return "http";
     }
 
     @Override
@@ -209,7 +230,7 @@ public class TestRequest implements HttpServletRequest {
 
     @Override
     public String getCharacterEncoding () {
-        return null;
+        return UTF_8;
     }
 
     @Override
@@ -219,22 +240,22 @@ public class TestRequest implements HttpServletRequest {
 
     @Override
     public int getContentLength () {
-        return 0;
+        return (getHeader (CONTENT_LENGTH_KEY) != null) ? new Integer (getHeader (CONTENT_LENGTH_KEY)) : null;
     }
 
     @Override
     public long getContentLengthLong () {
-        return 0;
+        return getContentLength ();
     }
 
     @Override
     public String getContentType () {
-        return null;
+        return getHeader (CONTENT_TYPE_KEY);
     }
 
     @Override
     public ServletInputStream getInputStream () throws IOException {
-        return new TestServletInputStream (postData.toString ());
+        return new TestServletInputStream (postData, UTF_8);
     }
 
     @Override
@@ -279,7 +300,7 @@ public class TestRequest implements HttpServletRequest {
 
     @Override
     public BufferedReader getReader () throws IOException {
-        return null;
+        return new BufferedReader (new InputStreamReader (getInputStream ()));
     }
 
     @Override

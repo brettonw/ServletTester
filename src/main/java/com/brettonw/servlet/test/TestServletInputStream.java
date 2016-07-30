@@ -6,14 +6,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 
 public class TestServletInputStream extends ServletInputStream {
     private InputStream inputStream;
 
-    public TestServletInputStream (String inputString) {
+    public TestServletInputStream (String inputString, String encoding) {
         try {
-            inputStream = new ByteArrayInputStream (inputString.getBytes(StandardCharsets.UTF_8.name ()));
+            inputStream = new ByteArrayInputStream (inputString.getBytes(encoding));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace ();
         }
