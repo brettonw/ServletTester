@@ -3,7 +3,7 @@
 
     <groupId>com.brettonw</groupId>
     <artifactId>servlet-tester</artifactId>
-    <version>1.2.7-SNAPSHOT</version>
+    <version>1.2.7</version>
 
     <packaging>jar</packaging>
 
