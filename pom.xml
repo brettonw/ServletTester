@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.brettonw</groupId>
             <artifactId>bag</artifactId>
-            <version>5.10.0</version>
+            <version>5.10.1</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
