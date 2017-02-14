@@ -84,12 +84,12 @@ public class Test_ServletTester extends HttpServlet {
 
     @Test
     public void testGetByObject () throws IOException {
-        doGetAssert (servletTester.bagObjectFromGet (new BagObject ().put (COMMAND_KEY, TEST_KEY)));
+        doGetAssert (servletTester.bagObjectFromGet (BagObject.open (COMMAND_KEY, TEST_KEY)));
     }
 
     @Test
     public void testGetByString () throws IOException {
-        doGetAssert (servletTester.bagObjectFromGet (new BagObject ().put (COMMAND_KEY, TEST_KEY).toString (MimeType.URL)));
+        doGetAssert (servletTester.bagObjectFromGet (BagObject.open (COMMAND_KEY, TEST_KEY).toString (MimeType.URL)));
     }
 
     private void doPostAssert (BagObject bagObject, BagObject postData) {
@@ -100,12 +100,12 @@ public class Test_ServletTester extends HttpServlet {
     @Test
     public void testPostByObject () throws IOException {
         BagObject postData = BagObjectFrom.resource (getClass (), "/testPost.json");
-        doPostAssert (servletTester.bagObjectFromPost (new BagObject ().put (COMMAND_KEY, TEST_KEY), postData), postData);
+        doPostAssert (servletTester.bagObjectFromPost (BagObject.open (COMMAND_KEY, TEST_KEY), postData), postData);
     }
 
     @Test
     public void testPostByString () throws IOException {
         BagObject postData = BagObjectFrom.resource (getClass (), "/testPost.json");
-        doPostAssert (servletTester.bagObjectFromPost (new BagObject ().put (COMMAND_KEY, TEST_KEY).toString (MimeType.URL), postData), postData);
+        doPostAssert (servletTester.bagObjectFromPost (BagObject.open (COMMAND_KEY, TEST_KEY).toString (MimeType.URL), postData), postData);
     }
 }
